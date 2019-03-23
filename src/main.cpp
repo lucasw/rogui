@@ -116,6 +116,7 @@ int main(int, char**)
 
   imgui_test::App app(ImVec2(width, height));
   imgui_test::Automata automata(ImVec2(width, height));
+  automata.droppedFile("../automata_sfml/data/map.png");
 
   ImGui::GetStyle().WindowRounding = 0.0f;// <- Set this on init or use ImGui::PushStyleVar()
   ImGui::GetStyle().ChildRounding = 0.0f;

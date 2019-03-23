@@ -92,6 +92,7 @@ bool Person::spawn()
 
 Land::Land(const std::string& path)
 {
+  std::cout << "new Land\n";
   cv::Mat map = cv::imread(path, cv::IMREAD_GRAYSCALE);
   if (map.empty()) {
     throw std::runtime_error("couldn't load image from disk " + path);
@@ -104,8 +105,9 @@ Land::Land(const std::string& path)
 
   std::cout << width << " " << height << "\n";
 
-  people_.reserve(1000);
-  // people_.emplace_back(Person(width/2, height/2));
+  peoples_["red"].emplace_back(Person(width/2 - 50, height/2));
+  peoples_["red"][0].color_ = cv::Vec3b(0, 0, 255);
+  peoples_["blue"].emplace_back(Person(width/2 + 50, height/2));
 }
 
 void Land::update()
@@ -113,40 +115,47 @@ void Land::update()
   if (map_.empty()) {
     return;
   }
-  std::vector<Person> new_people;
-  for(auto& person : people_) {
-    person.update(map_);
-    if ((people_.size() < people_limit_) && person.spawn()) {
-      new_people.emplace_back(Person(person.x_, person.y_));
-      new_people[new_people.size() - 1].spawn_max_ += rand() % 23;
+
+  for(auto& people_pair : peoples_) {
+    std::vector<Person> new_people;
+    for(auto& person : people_pair.second) {
+      person.update(map_);
+      if ((people_pair.second.size() < people_limit_) && person.spawn()) {
+        new_people.emplace_back(Person(person.x_, person.y_));
+        new_people[new_people.size() - 1].color_ = person.color_;
+        new_people[new_people.size() - 1].spawn_max_ += rand() % 23;
+      }
+    }
+    if (new_people.size() > 0) {
+      people_pair.second.insert(people_pair.second.end(), new_people.begin(), new_people.end());
     }
   }
-
-  if (new_people.size() > 0) {
-    std::cout << people_.size() << " new people " << new_people.size() << "\n";
-    people_.insert(people_.end(), new_people.begin(), new_people.end());
-  }
-
 }
 
 void Land::draw()
 {
-  const auto color = cv::Vec3b(255, 0, 0);
   cv::cvtColor(map_, image_, cv::COLOR_GRAY2RGB);
-  for(auto& person : people_) {
-    image_.at<cv::Vec3b>(person.y_, person.x_) = color;
+  for (const auto& people_pair : peoples_) {
+    for (const auto& person : people_pair.second) {
+      const auto x = person.x_;
+      const auto y = person.y_;
+      image_.at<cv::Vec3b>(y, x) = person.color_;  // image_.at<cv::Vec3b>(y, x) - color;
+    }
   }
 }
 
 void Land::resetPeople()
 {
-  people_.clear();
+  for(auto& people_pair : peoples_) {
+    people_pair.second.clear();
+  }
 }
 
 //////////////////////////////////////////////////////////
 
 Automata::Automata(const ImVec2 size) : size_(size)
 {
+  std::cout << "new Automata\n";
   window_flags_ = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove |
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_HorizontalScrollbar;
@@ -189,7 +198,7 @@ void Automata::drawImage()
   image_size.y = image.rows * zoom_;
 
   ImVec2 win_sz = ImGui::GetWindowSize();
-  bool dirty = false;
+  // bool dirty = false;
 
   float region_width = ImGui::GetWindowContentRegionWidth();
   // const ImVec2 uv0(-10.0, -10.0);  // = win_sz * 0.5 - image_size * 0.5;
@@ -222,7 +231,10 @@ void Automata::drawImage()
       if (clicked) {
         // make new Person
         msg_ = "making new person " + std::to_string(x) + " " + std::to_string(y);
-        land_->people_.emplace_back(Person(x, y));
+        Person person(x, y);
+        // TODO(lucasw) assign from static
+        person.color_ = cv::Vec3b(255, 0, 0);
+        land_->peoples_["blue"].push_back(person);
       }
     }
   }
@@ -233,23 +245,30 @@ void Automata::draw()
   ImGui::SetNextWindowPos(pos_);
   ImGui::SetNextWindowSize(ImVec2(size_.x * 0.25, size_.y));
 
-  bool is_open;
+  bool is_open = true;
 
-  ImGui::Begin("controls", &is_open, window_flags_);
+  ImGui::Begin("##controls", &is_open, window_flags_);
   if (is_open) {
     if (ImGui::Button("reset")) {
       land_->resetPeople();
     }
 
+    // ImGui::SliderInt("ticks between updates", &land_.ticks_to_move_, 1, 100);
   }
   ImGui::Text("%s", msg_.c_str());
+  if (land_) {
+    for(const auto& people_pair : land_->peoples_) {
+      ImGui::Text("%s %lu peoples", people_pair.first.c_str(), people_pair.second.size());
+    }
+    ImGui::Text("image %d x %d", land_->image_.cols, land_->image_.rows);
+    ImGui::Text("map %d x %d", land_->map_.cols, land_->map_.rows);
+  }
   ImGui::End();
 
   ImGui::SetNextWindowPos(ImVec2(pos_.x + size_.x * 0.25, pos_.y));
   ImGui::SetNextWindowSize(ImVec2(size_.x * 0.75, size_.y));
 
-  ImGui::Begin("automata", &is_open, window_flags_);
-  #if 1
+  ImGui::Begin("##automata", &is_open, window_flags_);
   if (is_open) {
     if ((land_) && (!land_->map_.empty())) {
       msg_ = "updating land and people";
@@ -257,10 +276,8 @@ void Automata::draw()
       land_->draw();
       glTexFromMat(land_->image_, texture_id_);
       drawImage();
-      cv::imshow("map", land_->map_);
     }
   }
-  #endif
   ImGui::End();
 }
 
