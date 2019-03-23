@@ -34,6 +34,9 @@ bool Person::update(cv::Mat& map)
   }
   // TODO(lucasw) handle swimming
 
+  new_x_ = x_;
+  new_y_ = y_;
+
   bool moved = false;
 
   ++x_move_count_;
@@ -49,7 +52,7 @@ bool Person::update(cv::Mat& map)
     if (ny < map.rows) {
       const auto val = map.at<uint8_t>(ny, x_);
       if (val > 0) {
-        y_ = ny;
+        new_y_ = ny;
         moved = true;
       } else {
         notVeryRandomNewDir();
@@ -69,7 +72,7 @@ bool Person::update(cv::Mat& map)
     if (nx < map.cols) {
       const auto val = map.at<uint8_t>(y_, nx);
       if (val > 0) {
-        x_ = nx;
+        new_x_ = nx;
         moved = true;
       } else {
         notVeryRandomNewDir();
@@ -128,33 +131,47 @@ void Land::update()
   }
 
   size_t num_people = 0;
-  for(auto& people_pair : peoples_) {
-    num_people += people_pair.second.size();
+  for (int y = 0; y < map_.rows; ++y) {
+    for (int x = 0; x < map_.cols; ++x) {
+      const size_t ind = y * map_.cols + x;
+      num_people += people_on_map_[ind].size();
+    }
   }
 
-  for(auto& people_pair : peoples_) {
-    const std::string& nation = people_pair.first;
-    std::vector<std::shared_ptr<Person> > new_people;
-    for(auto& person : people_pair.second) {
-      const int old_x = person->x_;
-      const int old_y = person->y_;
-      const bool moved = person->update(map_);
-      if (moved) {
-        // remove from old_x, old_y, add to current x_ y_
-        removePersonFromMap(person, old_x, old_y);
-        addPersonToMap(person);
-      }
+  std::vector<std::shared_ptr<Person> > new_people;
+  std::vector<std::shared_ptr<Person> > moving_people;
 
-      if ((num_people < people_limit_) && person->spawn()) {
-        auto new_person = std::make_shared<Person>(person->x_, person->y_, nation);
-        new_person->spawn_max_ += rand() % 23;
-        addPersonToMap(new_person);
-        new_people.push_back(new_person);
+  for (int y = 0; y < map_.rows; ++y) {
+    for (int x = 0; x < map_.cols; ++x) {
+      const size_t ind = y * map_.cols + x;
+      std::list<std::shared_ptr<Person> >& people = people_on_map_[ind];
+      for (auto it = people.begin(); it != people.end(); ++it) {
+        std::shared_ptr<Person> person = *it;
+
+        const bool moving = person->update(map_);
+        if (moving) {
+          moving_people.push_back(person);
+          // remove from old_x, old_y, add to current x_ y_
+        }
+
+        if ((num_people < people_limit_) && person->spawn()) {
+          auto new_person = std::make_shared<Person>(person->x_, person->y_, person->nation_);
+          new_person->spawn_max_ += rand() % 23;
+          new_people.push_back(new_person);
+        }
       }
     }
-    if (new_people.size() > 0) {
-      people_pair.second.insert(people_pair.second.end(), new_people.begin(), new_people.end());
-    }
+  }
+
+  for (auto& person : moving_people) {
+    // movePerson(person);
+    removePersonFromMap(person);
+    person->x_ = person->new_x_;
+    person->y_ = person->new_y_;
+    addPersonToMap(person);
+  }
+  for (auto& new_person : new_people) {
+    addPersonToMap(new_person);
   }
 }
 
@@ -176,12 +193,32 @@ void Land::draw()
         nums[nation]++;
         // color -= nation_colors_[nation] * 0.1;
       }
+
+      size_t num_to_die = 0;
       // image_.at<cv::Vec3b>(y, x) = color;  // image_.at<cv::Vec3b>(y, x) - color;
       if (nums["blue"] > nums["red"]) {
-        image_.at<cv::Vec3b>(y, x) = nation_colors_["blue"];
+        color = nation_colors_["blue"];
+        num_to_die = nums["red"];
+      } else if (nums["blue"] == nums["red"]) {
+        num_to_die = nums["red"];
       } else {
-        image_.at<cv::Vec3b>(y, x) = nation_colors_["red"];
+        num_to_die = nums["blue"];
+        color = nation_colors_["red"];
       }
+
+      if (num_to_die > 0) {
+        color = cv::Vec3b(128, 255, 128);
+        // TODO(lucasw) currently the logic is that the first in the list die first
+        auto it1 = people_on_map_[ind].begin();
+        auto it2 = people_on_map_[ind].begin();
+        while (num_to_die > 0) {
+          ++it2;
+          --num_to_die;
+        }
+        people_on_map_[ind].erase(it1, it2);
+      }
+      image_.at<cv::Vec3b>(y, x) = color;
+
     }
   }
 #if 0
@@ -200,7 +237,7 @@ void Land::addPerson(size_t x, size_t y, const std::string& nation)
   if (map_.empty()) return;
 
   auto person = std::make_shared<Person>(x, y, nation);
-  peoples_[nation].push_back(person);
+  // peoples_[nation].push_back(person);
   addPersonToMap(person);
 }
 
@@ -210,19 +247,26 @@ void Land::addPersonToMap(std::shared_ptr<Person> person)
   people_on_map_[ind].push_back(person);
 }
 
-void Land::removePersonFromMap(std::shared_ptr<Person> person,
-    const size_t old_x, const size_t old_y)
+void Land::removePersonFromMap(std::shared_ptr<Person> person)
 {
-  const size_t ind = old_y * map_.cols + old_x;
+  const size_t ind = person->y_ * map_.cols + person->x_;
   people_on_map_[ind].remove(person);
 }
 
 
 void Land::resetPeople()
 {
+  for (int y = 0; y < map_.rows; ++y) {
+    for (int x = 0; x < map_.cols; ++x) {
+      const size_t ind = y * map_.cols + x;
+      people_on_map_[ind].erase(people_on_map_[ind].begin(), people_on_map_[ind].end());
+    }
+  }
+  #if 0
   for(auto& people_pair : peoples_) {
     people_pair.second.clear();
   }
+  #endif
 }
 
 //////////////////////////////////////////////////////////
@@ -329,8 +373,8 @@ void Automata::draw()
   }
   ImGui::Text("%s", msg_.c_str());
   if (land_) {
-    for(const auto& people_pair : land_->peoples_) {
-      ImGui::Text("%s %lu peoples", people_pair.first.c_str(), people_pair.second.size());
+    for(const auto& people_pair : land_->num_peoples_) {
+      ImGui::Text("%s %lu peoples", people_pair.first.c_str(), people_pair.second);
     }
     ImGui::Text("image %d x %d", land_->image_.cols, land_->image_.rows);
     ImGui::Text("map %d x %d", land_->map_.cols, land_->map_.rows);

@@ -28,6 +28,9 @@ public:
   size_t x_;
   size_t y_;
 
+  size_t new_x_;
+  size_t new_y_;
+
   size_t change_dir_max_ = 41;
   size_t change_dir_count_ = 0;
 
@@ -47,12 +50,13 @@ public:
   void draw();
 
   void addPerson(size_t x, size_t y, const std::string& nation);
-  void removePersonFromMap(std::shared_ptr<Person> person, size_t old_x, size_t old_y);
+  void removePersonFromMap(std::shared_ptr<Person> person);
   void addPersonToMap(std::shared_ptr<Person> person);
   void resetPeople();
 
-  std::map<std::string, std::vector< std::shared_ptr<Person> > > peoples_;
+  // std::map<std::string, std::vector< std::shared_ptr<Person> > > peoples_;
   std::map<std::string, cv::Vec3b> nation_colors_;
+  std::map<std::string, size_t> num_peoples_;
 
   cv::Mat image_;
   cv::Mat map_;
