@@ -8,7 +8,7 @@ namespace imgui_test
 class App
 {
 public:
-  App();
+  App(const ImVec2 size);
 
   void draw();
 

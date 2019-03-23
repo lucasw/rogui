@@ -1,4 +1,5 @@
 #include <imgui_test/app.hpp>
+#include <imgui_test/utility.hpp>
 #include <opencv2/highgui.hpp>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -7,50 +8,10 @@
 namespace imgui_test
 {
 
-bool glTexFromMat(cv::Mat& image, GLuint& texture_id)
-{
-  if (image.empty()) {
-    // TODO(lucasw) or make the texture 0x0 or 1x1 gray.
-    return false;
-  }
-
-  glBindTexture(GL_TEXTURE_2D, texture_id);
-
-  // Do these know which texture to use because of the above bind?
-  // TODO(lucasw) make these configurable live
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-  // Set texture clamping method - GL_CLAMP isn't defined
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  // use fast 4-byte alignment (default anyway) if possible
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  // glPixelStorei(GL_UNPACK_ALIGNMENT, (image.step & 3) ? 1 : 4);
-
-  // copy the data to the graphics memory
-  // TODO(lucasw) actually look at the image encoding type and
-  // have a big switch statement here
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-               image.cols, image.rows,
-               0, GL_BGR, GL_UNSIGNED_BYTE, image.ptr());
-
-  // set length of one complete row in data (doesn't need to equal image.cols)
-  // glPixelStorei(GL_UNPACK_ROW_LENGTH, image.step / image_.elemSize());
-
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  return true;
-}
-
-App::App()
+App::App(const ImVec2 size) : size_(size)
 {
   pos_.x = 0;
   pos_.y = 0;
-
-  size_.x = 300;
-  size_.y = 720;
 
   window_flags_ = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove |
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |

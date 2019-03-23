@@ -50,5 +50,9 @@ target_link_libraries(imgui
   dl
 )
 
-add_executable(imgui_test src/main.cpp src/app.cpp)
+add_executable(imgui_test
+  src/main.cpp
+  src/app.cpp
+  src/utility.cpp
+)
 target_link_libraries(imgui_test imgui)

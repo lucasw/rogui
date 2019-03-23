@@ -113,9 +113,7 @@ int main(int, char**)
 
   ImVec4 clear_color = ImVec4(0.55f, 0.53f, 0.50f, 1.00f);
 
-  imgui_test::App app;
-  app.size_.x = width;
-  app.size_.y = height;
+  imgui_test::App app(ImVec2(width, height));
 
   ImGui::GetStyle().WindowRounding = 0.0f;// <- Set this on init or use ImGui::PushStyleVar()
   ImGui::GetStyle().ChildRounding = 0.0f;
