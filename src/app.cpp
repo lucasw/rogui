@@ -1,4 +1,5 @@
 #include <imgui_test/app.hpp>
+#include <opencv2/highgui.hpp>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
@@ -88,6 +89,8 @@ void App::draw()
 
     // ImGui::NextColumn();
     // ImGui::Columns(1);
+    ImGui::Text("%s", image_filename_.c_str());
+    ImGui::Text("%s", msg_.c_str());
   }
   ImGui::End();
 
@@ -125,6 +128,21 @@ void App::draw()
     glTexFromMat(image_, texture_id_);
   }
 
+}
+
+bool App::droppedFile(const std::string name)
+{
+  cv::Mat image = cv::imread(name, cv::IMREAD_COLOR);
+  if (!image.empty()) {
+    image_ = image;
+    width_ = image_.cols;
+    height_ = image_.rows;
+    glTexFromMat(image_, texture_id_);
+    image_filename_ = name;
+    msg_ = "loaded dropped image '" + name + "'";
+  } else {
+    msg_ = "Could not load image '" + name + "'";
+  }
 }
 
 }  // namespace imgui_test

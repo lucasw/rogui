@@ -85,9 +85,8 @@ int main(int, char**)
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO(); (void)io;
-  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-
-  // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
@@ -125,6 +124,8 @@ int main(int, char**)
   ImGui::GetStyle().PopupRounding = 0.0f;
   ImGui::GetStyle().ScrollbarRounding = 0.0f;
 
+  SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+
   // Main loop
   bool done = false;
   while (!done)
@@ -138,10 +139,13 @@ int main(int, char**)
     while (SDL_PollEvent(&event))
     {
       ImGui_ImplSDL2_ProcessEvent(&event);
-      if (event.type == SDL_QUIT)
+      if (event.type == SDL_QUIT) {
         done = true;
-      if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+      } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window)) {
         done = true;
+      } else if (event.type == SDL_DROPFILE) {
+        app.droppedFile(event.drop.file);
+      }
     }
 
     // Start the Dear ImGui frame

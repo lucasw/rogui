@@ -12,6 +12,10 @@ public:
 
   void draw();
 
+  std::string msg_;
+  std::string image_filename_;
+  bool droppedFile(const std::string name);
+
   cv::Mat image_;
   int width_ = 16;
   int height_ = 16;
