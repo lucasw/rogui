@@ -35,7 +35,7 @@ public:
   size_t change_dir_count_ = 0;
 
   size_t spawn_count_ = 0;
-  size_t spawn_max_ = 173;
+  size_t spawn_max_ = 473;
 
   std::string nation_ = "";
 
@@ -64,7 +64,7 @@ public:
   // the indices into here are position on map
   std::vector<std::list<std::shared_ptr<Person> > > people_on_map_;
 
-  const size_t people_limit_ = 110000;
+  const size_t people_limit_ = 48000;
 };
 
 class Automata
@@ -81,6 +81,9 @@ public:
   std::shared_ptr<Land> land_;
 
   float zoom_ = 3.0;
+
+  int spawn_ind_ = 0;
+  std::vector<std::string> spawn_types_;
 
   std::string msg_ = "Automata ready";
   ImVec2 pos_;

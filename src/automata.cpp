@@ -277,6 +277,9 @@ Automata::Automata(const ImVec2 size) : size_(size)
   window_flags_ = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove |
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_HorizontalScrollbar;
+
+  spawn_types_.push_back("red");
+  spawn_types_.push_back("blue");
 }
 
 bool Automata::droppedFile(const std::string name)
@@ -348,8 +351,9 @@ void Automata::drawImage()
       // mouse_over_image = true;
       if (clicked) {
         // make new Person
-        msg_ = "making new person " + std::to_string(x) + " " + std::to_string(y);
-        const std::string nation = "blue";
+        msg_ = "making new person " + std::to_string(x) + " " + std::to_string(y) + " "
+            + spawn_types_[spawn_ind_];
+        const std::string nation = spawn_types_[spawn_ind_];
         land_->addPerson(x, y, nation);
       }
     }
@@ -378,6 +382,8 @@ void Automata::draw()
     }
     ImGui::Text("image %d x %d", land_->image_.cols, land_->image_.rows);
     ImGui::Text("map %d x %d", land_->map_.cols, land_->map_.rows);
+
+    ImGui::Combo("spawn type", &spawn_ind_, "Red\0Blue\0");
   }
   ImGui::End();
 
