@@ -104,6 +104,7 @@ Land::Land(const std::string& path)
 
   std::cout << width << " " << height << "\n";
 
+  people_.reserve(1000);
   // people_.emplace_back(Person(width/2, height/2));
 }
 
@@ -135,6 +136,11 @@ void Land::draw()
   for(auto& person : people_) {
     image_.at<cv::Vec3b>(person.y_, person.x_) = color;
   }
+}
+
+void Land::resetPeople()
+{
+  people_.clear();
 }
 
 //////////////////////////////////////////////////////////
@@ -225,9 +231,23 @@ void Automata::drawImage()
 void Automata::draw()
 {
   ImGui::SetNextWindowPos(pos_);
-  ImGui::SetNextWindowSize(ImVec2(size_.x, size_.y));
+  ImGui::SetNextWindowSize(ImVec2(size_.x * 0.25, size_.y));
 
   bool is_open;
+
+  ImGui::Begin("controls", &is_open, window_flags_);
+  if (is_open) {
+    if (ImGui::Button("reset")) {
+      land_->resetPeople();
+    }
+
+  }
+  ImGui::Text("%s", msg_.c_str());
+  ImGui::End();
+
+  ImGui::SetNextWindowPos(ImVec2(pos_.x + size_.x * 0.25, pos_.y));
+  ImGui::SetNextWindowSize(ImVec2(size_.x * 0.75, size_.y));
+
   ImGui::Begin("automata", &is_open, window_flags_);
   #if 1
   if (is_open) {
@@ -241,7 +261,6 @@ void Automata::draw()
     }
   }
   #endif
-  ImGui::Text("%s", msg_.c_str());
   ImGui::End();
 }
 

@@ -58,8 +58,8 @@ int main(int, char**)
   SDL_GetCurrentDisplayMode(0, &current);
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
-  int width = 320 * 4;
-  int height = 200 * 4 + 40;
+  int width = 320 * 5;
+  int height = 200 * 4;
 
   SDL_Window* window = SDL_CreateWindow("imgui sdl2 opengl3", SDL_WINDOWPOS_CENTERED,
       SDL_WINDOWPOS_CENTERED, width, height, window_flags);

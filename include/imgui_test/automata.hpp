@@ -41,6 +41,8 @@ public:
   void update();
   void draw();
 
+  void resetPeople();
+
   std::vector<Person> people_;
 
   cv::Mat image_;
@@ -62,7 +64,7 @@ public:
 
   std::shared_ptr<Land> land_;
 
-  float zoom_ = 4.0;
+  float zoom_ = 3.0;
 
   std::string msg_ = "Automata ready";
   ImVec2 pos_;
