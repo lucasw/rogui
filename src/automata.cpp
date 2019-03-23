@@ -104,7 +104,7 @@ Land::Land(const std::string& path)
 
   std::cout << width << " " << height << "\n";
 
-  people_.emplace_back(Person(width/2, height/2));
+  // people_.emplace_back(Person(width/2, height/2));
 }
 
 void Land::update()
@@ -206,13 +206,20 @@ void Automata::drawImage()
       (active_id == ImGui::GetScrollbarID(window, ImGuiAxis_X) ||
        active_id == ImGui::GetScrollbarID(window, ImGuiAxis_Y));
 
-#if 0
   if (!any_scrollbar_active) {
     ImVec2 image_pos = (io.MousePos - screen_pos1) / zoom_;
     int x = image_pos.x;
     int y = image_pos.y;
+    bool clicked = ImGui::IsMouseDown(0);
+    if ((x >= 0) && (y >= 0) && (x < land_->image_.cols) && (y < land_->image_.rows)) {
+      // mouse_over_image = true;
+      if (clicked) {
+        // make new Person
+        msg_ = "making new person " + std::to_string(x) + " " + std::to_string(y);
+        land_->people_.emplace_back(Person(x, y));
+      }
+    }
   }
-#endif
 }
 
 void Automata::draw()

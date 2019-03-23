@@ -30,7 +30,7 @@ public:
   size_t change_dir_count_ = 0;
 
   size_t spawn_count_ = 0;
-  size_t spawn_max_ = 73;
+  size_t spawn_max_ = 373;
 
 };
 
