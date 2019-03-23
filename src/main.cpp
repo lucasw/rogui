@@ -8,6 +8,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_test/app.hpp>
+#include <imgui_test/automata.hpp>
 #include <stdio.h>
 
 // About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually.
@@ -57,8 +58,8 @@ int main(int, char**)
   SDL_GetCurrentDisplayMode(0, &current);
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
-  int width = 1280;
-  int height = 720;
+  int width = 320 * 4;
+  int height = 200 * 4;
 
   SDL_Window* window = SDL_CreateWindow("imgui sdl2 opengl3", SDL_WINDOWPOS_CENTERED,
       SDL_WINDOWPOS_CENTERED, width, height, window_flags);
@@ -114,6 +115,7 @@ int main(int, char**)
   ImVec4 clear_color = ImVec4(0.55f, 0.53f, 0.50f, 1.00f);
 
   imgui_test::App app(ImVec2(width, height));
+  imgui_test::Automata automata(ImVec2(width, height));
 
   ImGui::GetStyle().WindowRounding = 0.0f;// <- Set this on init or use ImGui::PushStyleVar()
   ImGui::GetStyle().ChildRounding = 0.0f;
@@ -133,6 +135,7 @@ int main(int, char**)
     // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
     // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
     // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    std::string new_dropped_file = "";
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -142,7 +145,7 @@ int main(int, char**)
       } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window)) {
         done = true;
       } else if (event.type == SDL_DROPFILE) {
-        app.droppedFile(event.drop.file);
+        new_dropped_file = event.drop.file;
       }
     }
 
@@ -152,7 +155,23 @@ int main(int, char**)
     ImGui::NewFrame();
 
     // do all the imgui draws
-    app.draw();
+    // if (ImGui::BeginTabBar("##MainTabBar")) {
+    {
+      #if 0
+      if (ImGui::BeginTabItem("Test App")) {
+        app.droppedFile(new_dropped_file);
+        app.draw();
+        ImGui::EndTabItem();
+      }
+      #endif
+      // if (ImGui::BeginTabItem("Automata")) {
+        automata.droppedFile(new_dropped_file);
+        automata.update();
+        automata.draw();
+      //  ImGui::EndTabItem();
+      // }
+      // ImGui::EndTabBar();
+    }
 
     // Rendering
     ImGui::Render();

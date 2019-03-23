@@ -174,6 +174,7 @@ void App::draw()
 
 bool App::droppedFile(const std::string name)
 {
+  if (name == "") return false;
   cv::Mat image = cv::imread(name, cv::IMREAD_COLOR);
   if (image.empty()) {
     msg_ = "Could not load image '" + name + "'";
