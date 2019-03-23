@@ -10,9 +10,10 @@
 namespace imgui_test
 {
 
-Person::Person(const size_t& x, const size_t& y) :
+Person::Person(const size_t& x, const size_t& y, const std::string& nation) :
     x_(x),
-    y_(y)
+    y_(y),
+    nation_(nation)
 {
 }
 
@@ -22,16 +23,18 @@ void Person::notVeryRandomNewDir()
   y_move_max_ = rand() % 20 - 10;
 }
 
-void Person::update(cv::Mat& map)
+bool Person::update(cv::Mat& map)
 {
   if (map.empty()) {
-    return;
+    return false;
   }
   ++tick_count_;
   if (tick_count_ % ticks_to_move_ != 0) {
-    return;
+    return false;
   }
   // TODO(lucasw) handle swimming
+
+  bool moved = false;
 
   ++x_move_count_;
   ++y_move_count_;
@@ -47,6 +50,7 @@ void Person::update(cv::Mat& map)
       const auto val = map.at<uint8_t>(ny, x_);
       if (val > 0) {
         y_ = ny;
+        moved = true;
       } else {
         notVeryRandomNewDir();
       }
@@ -66,6 +70,7 @@ void Person::update(cv::Mat& map)
       const auto val = map.at<uint8_t>(y_, nx);
       if (val > 0) {
         x_ = nx;
+        moved = true;
       } else {
         notVeryRandomNewDir();
       }
@@ -79,6 +84,7 @@ void Person::update(cv::Mat& map)
   }
 
   ++move_count_;
+  return moved;
 }
 
 bool Person::spawn()
@@ -90,6 +96,7 @@ bool Person::spawn()
   return false;
 }
 
+//////////////////////////////////////////////////////////////////////
 Land::Land(const std::string& path)
 {
   std::cout << "new Land\n";
@@ -103,11 +110,15 @@ Land::Land(const std::string& path)
   const auto width = map_.cols;
   const auto height = map_.rows;
 
+  people_on_map_.resize(width * height);
+
   std::cout << width << " " << height << "\n";
 
-  peoples_["red"].emplace_back(Person(width/2 - 50, height/2));
-  peoples_["red"][0].color_ = cv::Vec3b(0, 0, 255);
-  peoples_["blue"].emplace_back(Person(width/2 + 50, height/2));
+  nation_colors_["red"] = cv::Vec3b(0, 0, 255);
+  nation_colors_["blue"] = cv::Vec3b(255, 0, 0);
+
+  addPerson(width / 2 - 50, height / 2, "red");
+  addPerson(width / 2 + 50, height / 2, "blue");
 }
 
 void Land::update()
@@ -116,14 +127,29 @@ void Land::update()
     return;
   }
 
+  size_t num_people = 0;
   for(auto& people_pair : peoples_) {
-    std::vector<Person> new_people;
+    num_people += people_pair.second.size();
+  }
+
+  for(auto& people_pair : peoples_) {
+    const std::string& nation = people_pair.first;
+    std::vector<std::shared_ptr<Person> > new_people;
     for(auto& person : people_pair.second) {
-      person.update(map_);
-      if ((people_pair.second.size() < people_limit_) && person.spawn()) {
-        new_people.emplace_back(Person(person.x_, person.y_));
-        new_people[new_people.size() - 1].color_ = person.color_;
-        new_people[new_people.size() - 1].spawn_max_ += rand() % 23;
+      const int old_x = person->x_;
+      const int old_y = person->y_;
+      const bool moved = person->update(map_);
+      if (moved) {
+        // remove from old_x, old_y, add to current x_ y_
+        removePersonFromMap(person, old_x, old_y);
+        addPersonToMap(person);
+      }
+
+      if ((num_people < people_limit_) && person->spawn()) {
+        auto new_person = std::make_shared<Person>(person->x_, person->y_, nation);
+        new_person->spawn_max_ += rand() % 23;
+        addPersonToMap(new_person);
+        new_people.push_back(new_person);
       }
     }
     if (new_people.size() > 0) {
@@ -135,6 +161,30 @@ void Land::update()
 void Land::draw()
 {
   cv::cvtColor(map_, image_, cv::COLOR_GRAY2RGB);
+  for (int y = 0; y < map_.rows; ++y) {
+    for (int x = 0; x < map_.cols; ++x) {
+      const size_t ind = y * map_.cols + x;
+      if (people_on_map_[ind].size() == 0) {
+        continue;
+      }
+
+      std::map<std::string, size_t> nums;
+      cv::Vec3b color(255, 255, 255);
+
+      for (auto it = people_on_map_[ind].begin(); it != people_on_map_[ind].end(); ++it) {
+        const std::string& nation = (*it)->nation_;
+        nums[nation]++;
+        // color -= nation_colors_[nation] * 0.1;
+      }
+      // image_.at<cv::Vec3b>(y, x) = color;  // image_.at<cv::Vec3b>(y, x) - color;
+      if (nums["blue"] > nums["red"]) {
+        image_.at<cv::Vec3b>(y, x) = nation_colors_["blue"];
+      } else {
+        image_.at<cv::Vec3b>(y, x) = nation_colors_["red"];
+      }
+    }
+  }
+#if 0
   for (const auto& people_pair : peoples_) {
     for (const auto& person : people_pair.second) {
       const auto x = person.x_;
@@ -142,7 +192,31 @@ void Land::draw()
       image_.at<cv::Vec3b>(y, x) = person.color_;  // image_.at<cv::Vec3b>(y, x) - color;
     }
   }
+#endif
 }
+
+void Land::addPerson(size_t x, size_t y, const std::string& nation)
+{
+  if (map_.empty()) return;
+
+  auto person = std::make_shared<Person>(x, y, nation);
+  peoples_[nation].push_back(person);
+  addPersonToMap(person);
+}
+
+void Land::addPersonToMap(std::shared_ptr<Person> person)
+{
+  const size_t ind = person->y_ * map_.cols + person->x_;
+  people_on_map_[ind].push_back(person);
+}
+
+void Land::removePersonFromMap(std::shared_ptr<Person> person,
+    const size_t old_x, const size_t old_y)
+{
+  const size_t ind = old_y * map_.cols + old_x;
+  people_on_map_[ind].remove(person);
+}
+
 
 void Land::resetPeople()
 {
@@ -231,10 +305,8 @@ void Automata::drawImage()
       if (clicked) {
         // make new Person
         msg_ = "making new person " + std::to_string(x) + " " + std::to_string(y);
-        Person person(x, y);
-        // TODO(lucasw) assign from static
-        person.color_ = cv::Vec3b(255, 0, 0);
-        land_->peoples_["blue"].push_back(person);
+        const std::string nation = "blue";
+        land_->addPerson(x, y, nation);
       }
     }
   }

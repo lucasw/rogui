@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <imgui_test/gl.h>
+#include <list>
 #include <map>
 #include <memory>
 #include <opencv2/imgproc.hpp>
@@ -10,10 +11,10 @@ namespace imgui_test
 class Person
 {
 public:
-  Person(const size_t& x, const size_t& y);
+  Person(const size_t& x, const size_t& y, const std::string& nation);
 
   void notVeryRandomNewDir();
-  void update(cv::Mat& map);
+  bool update(cv::Mat& map);
   bool spawn();
 
   size_t move_count_ = 0;
@@ -31,7 +32,9 @@ public:
   size_t change_dir_count_ = 0;
 
   size_t spawn_count_ = 0;
-  size_t spawn_max_ = 373;
+  size_t spawn_max_ = 173;
+
+  std::string nation_ = "";
 
   cv::Vec3b color_ = cv::Vec3b(255, 0, 0);
 };
@@ -43,12 +46,19 @@ public:
   void update();
   void draw();
 
+  void addPerson(size_t x, size_t y, const std::string& nation);
+  void removePersonFromMap(std::shared_ptr<Person> person, size_t old_x, size_t old_y);
+  void addPersonToMap(std::shared_ptr<Person> person);
   void resetPeople();
 
-  std::map<std::string, std::vector<Person> > peoples_;
+  std::map<std::string, std::vector< std::shared_ptr<Person> > > peoples_;
+  std::map<std::string, cv::Vec3b> nation_colors_;
 
   cv::Mat image_;
   cv::Mat map_;
+
+  // the indices into here are position on map
+  std::vector<std::list<std::shared_ptr<Person> > > people_on_map_;
 
   const size_t people_limit_ = 110000;
 };
