@@ -31,7 +31,7 @@ include_directories(
   ${SDL2_INCLUDE_DIRS}
 )
 
-add_library(imgui SHARED
+add_library(imguitest SHARED
   imgui/imgui.cpp
   imgui/imgui_demo.cpp
   imgui/imgui_draw.cpp
@@ -42,7 +42,7 @@ add_library(imgui SHARED
 )
 set_source_files_properties(imgui/examples/libs/gl3w/GL/gl3w.c PROPERTIES COMPILE_FLAGS -Wno-pedantic)
 
-target_link_libraries(imgui
+target_link_libraries(imguitest
   ${OpenCV_LIBRARIES}
   ${PCL_LIBRARIES}
   ${SDL2_LIBRARIES}
@@ -56,4 +56,4 @@ add_executable(imgui_test
   src/automata.cpp
   src/utility.cpp
 )
-target_link_libraries(imgui_test imgui)
+target_link_libraries(imgui_test imguitest)
