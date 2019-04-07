@@ -1,11 +1,11 @@
-#include <imgui_test/app.hpp>
-#include <imgui_test/utility.hpp>
+#include <rogui/app.hpp>
+#include <rogui/utility.hpp>
 #include <opencv2/highgui.hpp>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
-namespace imgui_test
+namespace rogui
 {
 
 App::App(const ImVec2 size) : size_(size)
@@ -111,7 +111,7 @@ void App::drawPrimitives()
   // const float spacing = 30.0;
   const float sz = 4.0;
   // can't draw too many
-  // imgui_test: /home/lwalter/own/imgui_test/imgui/imgui.cpp:3937: void AddDrawListToDrawData(ImVector<ImDrawList*>*, ImDrawList*): Assertion `draw_list->_VtxCurrentIdx < (1 << 16) && "Too many vertices in ImDrawList using 16-bit indices. Read comment above"' failed.
+  // rogui: /home/lwalter/own/rogui/imgui/imgui.cpp:3937: void AddDrawListToDrawData(ImVector<ImDrawList*>*, ImDrawList*): Assertion `draw_list->_VtxCurrentIdx < (1 << 16) && "Too many vertices in ImDrawList using 16-bit indices. Read comment above"' failed.
   for (int i = 0; i < 100; ++i) {
     for (int j = 0; j < 100; ++j) {
       const float cx = pt.x + j * sz * 1.5;
@@ -189,4 +189,4 @@ bool App::droppedFile(const std::string name)
   return true;
 }
 
-}  // namespace imgui_test
+}  // namespace rogui

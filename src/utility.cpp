@@ -1,10 +1,10 @@
-#include <imgui_test/utility.hpp>
+#include <rogui/utility.hpp>
 #include <opencv2/highgui.hpp>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
-namespace imgui_test
+namespace rogui
 {
 
 bool glTexFromMat(cv::Mat& image, GLuint& texture_id)
@@ -44,4 +44,4 @@ bool glTexFromMat(cv::Mat& image, GLuint& texture_id)
   return true;
 }
 
-}  // namespace imgui_test
+}  // namespace rogui

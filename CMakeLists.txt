@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(imgui_test)
+project(rogui)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -50,10 +50,10 @@ target_link_libraries(imguitest
   dl
 )
 
-add_executable(imgui_test
+add_executable(rogui
   src/main.cpp
   src/app.cpp
   src/automata.cpp
   src/utility.cpp
 )
-target_link_libraries(imgui_test imguitest)
+target_link_libraries(rogui imguitest)

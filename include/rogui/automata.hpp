@@ -1,11 +1,11 @@
 #include <imgui.h>
-#include <imgui_test/gl.h>
+#include <rogui/gl.h>
 #include <list>
 #include <map>
 #include <memory>
 #include <opencv2/imgproc.hpp>
 
-namespace imgui_test
+namespace rogui
 {
 
 class Person
@@ -92,4 +92,4 @@ public:
   GLuint texture_id_;
 };
 
-}  // namespace imgui_test
+}  // namespace rogui

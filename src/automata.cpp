@@ -1,13 +1,13 @@
 #include <iostream>
-#include <imgui_test/automata.hpp>
-#include <imgui_test/utility.hpp>
+#include <rogui/automata.hpp>
+#include <rogui/utility.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
-namespace imgui_test
+namespace rogui
 {
 
 Person::Person(const size_t& x, const size_t& y, const std::string& nation) :
@@ -403,4 +403,4 @@ void Automata::draw()
   ImGui::End();
 }
 
-}  // namespace imgui_test
+}  // namespace rogui
