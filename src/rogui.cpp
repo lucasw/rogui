@@ -12,6 +12,19 @@
 namespace rogui
 {
 
+void Player::draw(const ImVec2 window_offset, const float scale)
+{
+  // ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  const float screen_x = window_offset.x + x_ * scale;
+  const float screen_y = window_offset.y + y_ * scale;
+  // TODO(lucasw) change font size based on scale - but do it once
+  // at beginning of map draw and then restore default.
+  ImGui::SetCursorScreenPos(ImVec2(screen_x + scale * 0.2, screen_y));
+  ImGui::Text("@");
+}
+
+/////////////////////////////////////////////////////////////////
 Map::Map(const size_t width, const size_t height) :
   width_(width),
   height_(height)
@@ -92,6 +105,8 @@ void Map::draw(const int x, const int y, const size_t width, const size_t height
       drawCell(screen_x, screen_y, scale, grid_[ind]);
     }
   }
+
+  player_->draw(pt, scale);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -102,7 +117,13 @@ Rogui::Rogui(const ImVec2 size) : size_(size)
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_HorizontalScrollbar;
 
-  map_ = std::make_shared<Map>(30, 30);
+  map_ = std::make_shared<Map>(60, 30);
+  player_ = std::make_shared<Player>();
+  player_->name_ = "player";
+  player_->x_ = map_->width_ / 2;
+  player_->y_ = map_->height_ / 2;
+  map_->player_ = player_;
+
   msg_.reserve(80 * 20);
 }
 

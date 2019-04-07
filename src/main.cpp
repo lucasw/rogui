@@ -7,6 +7,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
+#include <iostream>
 #include <rogui/app.hpp>
 #include <rogui/rogui.hpp>
 #include <stdio.h>
@@ -147,6 +148,11 @@ int main(int, char**)
         done = true;
       } else if (event.type == SDL_DROPFILE) {
         new_dropped_file = event.drop.file;
+      } else if (event.type == SDL_KEYDOWN) {
+        if (event.key.keysym.sym == SDLK_h) {
+          // rogui->keyPress(event.key.keysym.sym);
+          std::cout << "move left\n";
+        }
       }
     }
 

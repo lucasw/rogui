@@ -30,6 +30,17 @@ struct Cell
   ImU32 col32_;
 };
 
+class Player
+{
+public:
+  void draw(const ImVec2 window_offset, const float scale);
+
+  size_t x_;
+  size_t y_;
+
+  std::string name_;
+};
+
 class Map
 {
 public:
@@ -43,6 +54,9 @@ public:
 
   std::vector<uint8_t> grid_;
   std::map<uint8_t, Cell> cells_;
+
+  // TODO(lucasw) list of entities
+  std::shared_ptr<Player> player_;
 
   const size_t width_;
   const size_t height_;
@@ -64,6 +78,7 @@ public:
   float zoom_ = 3.0;
 
   std::shared_ptr<Map> map_;
+  std::shared_ptr<Player> player_;
 
   std::string msg_ = "Rogui ready";
   ImVec2 pos_;
