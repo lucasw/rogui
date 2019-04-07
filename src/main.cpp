@@ -8,7 +8,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 #include <rogui/app.hpp>
-#include <rogui/automata.hpp>
+#include <rogui/rogui.hpp>
 #include <stdio.h>
 
 // About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually.
@@ -115,8 +115,8 @@ int main(int, char**)
   ImVec4 clear_color = ImVec4(0.55f, 0.53f, 0.50f, 1.00f);
 
   rogui::App app(ImVec2(width, height));
-  rogui::Automata automata(ImVec2(width, height));
-  automata.droppedFile("../automata_sfml/data/map.png");
+  rogui::Rogui rogui(ImVec2(width, height));
+  // automata.droppedFile("../automata_sfml/data/map.png");
 
   ImGui::GetStyle().WindowRounding = 0.0f;// <- Set this on init or use ImGui::PushStyleVar()
   ImGui::GetStyle().ChildRounding = 0.0f;
@@ -166,9 +166,9 @@ int main(int, char**)
       }
       #endif
       // if (ImGui::BeginTabItem("Automata")) {
-        automata.droppedFile(new_dropped_file);
-        automata.update();
-        automata.draw();
+        // rogui.droppedFile(new_dropped_file);
+        rogui.update();
+        rogui.draw();
       //  ImGui::EndTabItem();
       // }
       // ImGui::EndTabBar();

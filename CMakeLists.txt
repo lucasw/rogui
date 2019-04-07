@@ -54,6 +54,7 @@ add_executable(rogui
   src/main.cpp
   src/app.cpp
   src/automata.cpp
+  src/rogui.cpp
   src/utility.cpp
 )
 target_link_libraries(rogui imguitest)
