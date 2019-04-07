@@ -139,6 +139,7 @@ int main(int, char**)
     // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
     std::string new_dropped_file = "";
     SDL_Event event;
+    std::vector<SDL_Keycode> key_presses;
     while (SDL_PollEvent(&event))
     {
       ImGui_ImplSDL2_ProcessEvent(&event);
@@ -149,10 +150,7 @@ int main(int, char**)
       } else if (event.type == SDL_DROPFILE) {
         new_dropped_file = event.drop.file;
       } else if (event.type == SDL_KEYDOWN) {
-        if (event.key.keysym.sym == SDLK_h) {
-          // rogui->keyPress(event.key.keysym.sym);
-          std::cout << "move left\n";
-        }
+        key_presses.push_back(event.key.keysym.sym);
       }
     }
 
@@ -173,7 +171,7 @@ int main(int, char**)
       #endif
       // if (ImGui::BeginTabItem("Automata")) {
         // rogui.droppedFile(new_dropped_file);
-        rogui.update();
+        rogui.update(key_presses);
         rogui.draw();
       //  ImGui::EndTabItem();
       // }

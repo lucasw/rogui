@@ -12,6 +12,34 @@
 namespace rogui
 {
 
+Player::Player(const std::string& name) :
+  name_(name)
+{
+  key_actions_.insert(std::make_pair(SDLK_h, std::bind(&Player::move, this, -1, 0)));
+  key_actions_.insert(std::make_pair(SDLK_j, std::bind(&Player::move, this, 0, 1)));
+  key_actions_.insert(std::make_pair(SDLK_k, std::bind(&Player::move, this, 0, -1)));
+  key_actions_.insert(std::make_pair(SDLK_l, std::bind(&Player::move, this, 1, 0)));
+
+  key_actions_.insert(std::make_pair(SDLK_y, std::bind(&Player::move, this, -1, -1)));
+  key_actions_.insert(std::make_pair(SDLK_u, std::bind(&Player::move, this, 1, -1)));
+  key_actions_.insert(std::make_pair(SDLK_b, std::bind(&Player::move, this, -1, 1)));
+  key_actions_.insert(std::make_pair(SDLK_n, std::bind(&Player::move, this, 1, 1)));
+}
+
+void Player::handleKey(const SDL_Keycode& key)
+{
+  if (key_actions_.count(key) > 0) {
+    key_actions_.at(key)();
+  }
+}
+
+void Player::move(const int dx, const int dy)
+{
+  // std::cout << dx << " " << dy << "\n";
+  x_ += dx;
+  y_ += dy;
+}
+
 void Player::draw(const ImVec2 window_offset, const float scale)
 {
   // ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -20,8 +48,9 @@ void Player::draw(const ImVec2 window_offset, const float scale)
   const float screen_y = window_offset.y + y_ * scale;
   // TODO(lucasw) change font size based on scale - but do it once
   // at beginning of map draw and then restore default.
-  ImGui::SetCursorScreenPos(ImVec2(screen_x + scale * 0.2, screen_y));
-  ImGui::Text("@");
+  ImGui::SetCursorScreenPos(ImVec2(screen_x + scale * 0.3, screen_y + scale * 0.1));
+  // TODO(lucasw) text color
+  ImGui::Text("%c", sym_);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -118,8 +147,8 @@ Rogui::Rogui(const ImVec2 size) : size_(size)
       ImGuiWindowFlags_HorizontalScrollbar;
 
   map_ = std::make_shared<Map>(60, 30);
-  player_ = std::make_shared<Player>();
-  player_->name_ = "player";
+  player_ = std::make_shared<Player>("player");
+  player_->sym_ = 'A';
   player_->x_ = map_->width_ / 2;
   player_->y_ = map_->height_ / 2;
   map_->player_ = player_;
@@ -143,8 +172,11 @@ bool Rogui::droppedFile(const std::string name)
 }
 #endif
 
-void Rogui::update()
+void Rogui::update(const std::vector<SDL_Keycode>& key_presses)
 {
+  for (const auto& key : key_presses) {
+    player_->handleKey(key);
+  }
 }
 
 void Rogui::drawImage()

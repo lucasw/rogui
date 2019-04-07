@@ -1,9 +1,12 @@
+#include <SDL.h>
+#include <functional>
 #include <imgui.h>
 #include <rogui/gl.h>
 #include <list>
 #include <map>
 #include <memory>
-#include <opencv2/imgproc.hpp>
+// #include <opencv2/imgproc.hpp>
+#include <vector>
 
 namespace rogui
 {
@@ -33,12 +36,23 @@ struct Cell
 class Player
 {
 public:
+  Player(const std::string& name);
+
+  void handleKey(const SDL_Keycode& key);
+
+  void move(const int dx, const int dy);
+
   void draw(const ImVec2 window_offset, const float scale);
+
+  std::map<SDL_Keycode, std::function<void ()> > key_actions_;
+
+  // const
+  char sym_ = '@';
 
   size_t x_;
   size_t y_;
 
-  std::string name_;
+  const std::string name_;
 };
 
 class Map
@@ -71,7 +85,8 @@ public:
   bool droppedFile(const std::string name);
 #endif
 
-  void update();
+  void update(const std::vector<int>& key_presses);
+
   void draw();
   void drawImage();
 
