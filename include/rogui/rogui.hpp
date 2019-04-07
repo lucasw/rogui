@@ -33,6 +33,8 @@ struct Cell
   ImU32 col32_;
 };
 
+class Map;
+
 class Player
 {
 public:
@@ -40,7 +42,7 @@ public:
 
   void handleKey(const SDL_Keycode& key);
 
-  void move(const int dx, const int dy);
+  bool move(const int dx, const int dy);
 
   void draw(const ImVec2 window_offset, const float scale);
 
@@ -49,16 +51,20 @@ public:
   // const
   char sym_ = '@';
 
-  size_t x_;
-  size_t y_;
+  int x_;
+  int y_;
 
   const std::string name_;
+
+  std::weak_ptr<Map> map_;
 };
 
 class Map
 {
 public:
   Map(const size_t width, const size_t height);
+
+  bool passable(const int& x, const int& y);
 
   void drawCell(const float screen_x, const float screen_y, const float scale,
     const uint8_t cell_type);

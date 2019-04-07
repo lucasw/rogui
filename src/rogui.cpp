@@ -15,6 +15,7 @@ namespace rogui
 Player::Player(const std::string& name) :
   name_(name)
 {
+  // TODO(lucasw) eventually these need to be context specific, what menu is being used
   key_actions_.insert(std::make_pair(SDLK_h, std::bind(&Player::move, this, -1, 0)));
   key_actions_.insert(std::make_pair(SDLK_j, std::bind(&Player::move, this, 0, 1)));
   key_actions_.insert(std::make_pair(SDLK_k, std::bind(&Player::move, this, 0, -1)));
@@ -33,11 +34,20 @@ void Player::handleKey(const SDL_Keycode& key)
   }
 }
 
-void Player::move(const int dx, const int dy)
+bool Player::move(const int dx, const int dy)
 {
+  const int tmp_x = x_ + dx;
+  const int tmp_y = y_ + dy;
   // std::cout << dx << " " << dy << "\n";
-  x_ += dx;
-  y_ += dy;
+  if (auto map = map_.lock()) {
+    // TODO(lucasw) later passability will depend on player traits
+    if (map->passable(tmp_x, tmp_y)) {
+      x_ = tmp_x;
+      y_ = tmp_y;
+      return true;
+    }
+  }
+  return false;
 }
 
 void Player::draw(const ImVec2 window_offset, const float scale)
@@ -97,6 +107,28 @@ Map::Map(const size_t width, const size_t height) :
   }
 }
 
+bool Map::passable(const int& x, const int& y)
+{
+  if (x < 0) {
+    return false;
+  }
+  if (y < 0) {
+    return false;
+  }
+  if (x >= static_cast<int>(width_)) {
+    return false;
+  }
+  if (y >= static_cast<int>(height_)) {
+    return false;
+  }
+  const size_t ind = y * width_ + x;
+  if (grid_[ind] == 2) {
+    return true;
+  }
+
+  return false;
+}
+
 void Map::drawCell(const float screen_x, const float screen_y, const float scale,
     const uint8_t cell_type)
 {
@@ -148,7 +180,8 @@ Rogui::Rogui(const ImVec2 size) : size_(size)
 
   map_ = std::make_shared<Map>(60, 30);
   player_ = std::make_shared<Player>("player");
-  player_->sym_ = 'A';
+  player_->sym_ = '@';
+  player_->map_ = map_;
   player_->x_ = map_->width_ / 2;
   player_->y_ = map_->height_ / 2;
   map_->player_ = player_;
