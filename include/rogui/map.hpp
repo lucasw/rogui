@@ -47,6 +47,7 @@ class Map;
 
 void generateInit(std::shared_ptr<Map> map);
 void generateRandom(std::shared_ptr<Map> map);
+void generateDucci(std::shared_ptr<Map> map);
 
 class Player;
 

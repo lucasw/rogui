@@ -67,14 +67,15 @@ void Player::draw(const ImVec2 window_offset, const float scale)
 //////////////////////////////////////////////////////////////////////////
 Rogui::Rogui(const ImVec2 size) : size_(size)
 {
-  std::cout << "new Rogui\n";
+  std::cout << "#### Rogui ####\n";
   window_flags_ = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove |
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_HorizontalScrollbar;
 
-  map_ = std::make_shared<Map>(90, 40);
+  map_ = std::make_shared<Map>(8 * 9, 8 * 5);
   generateInit(map_);
-  generateRandom(map_);
+  // generateRandom(map_);
+  generateDucci(map_);
 
   player_ = std::make_shared<Player>("player");
   player_->sym_ = '@';

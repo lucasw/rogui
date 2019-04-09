@@ -15,6 +15,11 @@ namespace rogui
 
 void generateInit(std::shared_ptr<Map> map)
 {
+  std::cout << "Map generation\n";
+  if (map == nullptr) {
+    throw std::runtime_error("null map passed to generator");
+  }
+
   // TODO(lucasw) load all the cell types from a text file
   Cell impassable("impassable");
   impassable.col32_ = ImColor(ImVec4(0.2, 0.2, 0.2, 1.0));
@@ -52,6 +57,7 @@ void generateInit(std::shared_ptr<Map> map)
 
 void generateRandom(std::shared_ptr<Map> map)
 {
+  std::cout << "Map generate random\n";
   if (map == nullptr) {
     throw std::runtime_error("null map passed to generator");
   }
@@ -70,6 +76,52 @@ void generateRandom(std::shared_ptr<Map> map)
       }
       map->grid_[ind] = FLOOR;
     }
+  }
+}
+
+void generateDucci(std::shared_ptr<Map> map)
+{
+  std::cout << "Map generate ducci\n";
+  if (map == nullptr) {
+    throw std::runtime_error("null map passed to generator");
+  }
+
+  const size_t& wd = map->width_;
+  const size_t& ht = map->height_;
+
+  std::vector<std::array<uint16_t, 4> > ducci;
+  const size_t num = 48;
+  ducci.reserve(num);
+  ducci.push_back({0, 653, 1854, 4063});
+
+  for (size_t i = 1; i < num; ++i) {
+    const auto& ducci1 = ducci[i - 1];
+    auto ducci2(ducci1);
+    for (size_t ind = 0; ind < ducci2.size(); ++ind) {
+      const size_t next_ind = (i + 1) % ducci1.size();
+      ducci2[ind] = std::abs(ducci1[next_ind] - ducci1[ind]);
+    }
+    ducci.push_back(ducci2);
+  }
+
+  size_t count = 0;
+  for (const auto& d : ducci) {
+    for (const auto& num : d) {
+      for (size_t i = 0; i < sizeof(num) * CHAR_BIT; ++i) {
+        if (count >= map->grid_.size()) {
+          break;
+        }
+        // auto grid_loc  = count / (wd - 2)
+        // const auto& grid_val = map->grid_[count];
+        // if (grid_val != IMPASSABLE) {
+        if ((num & (0x1 << i)) == 0) {
+          map->grid_[count] = FLOOR;
+        }
+        ++count;
+      }
+      std::cout << num << " ";
+    }
+    std::cout << "\n";
   }
 }
 
