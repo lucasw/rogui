@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <functional>
 #include <imgui.h>
+#include <rogui/character.hpp>
 #include <rogui/gl.h>
 #include <list>
 #include <map>
@@ -16,28 +17,18 @@ namespace rogui
 
 class Map;
 
-class Player
+class Player : public Character
 {
 public:
   Player(const std::string& name);
 
+#if 0
+  virtual bool move(const int dx, const int dy);
+  virtual void draw(const ImVec2 window_offset, const float scale);
+#endif
+
   void handleKey(const SDL_Keycode& key);
-
-  bool move(const int dx, const int dy);
-
-  void draw(const ImVec2 window_offset, const float scale);
-
   std::map<SDL_Keycode, std::function<void ()> > key_actions_;
-
-  // const
-  char sym_ = '@';
-
-  int x_;
-  int y_;
-
-  const std::string name_;
-
-  std::weak_ptr<Map> map_;
 };
 
 class Rogui

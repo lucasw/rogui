@@ -1,11 +1,9 @@
 #ifndef ROGUI_MAP_HPP
 #define ROGUI_MAP_HPP
 
-#include <SDL.h>
 #include <functional>
 #include <imgui.h>
-#include <rogui/gl.h>
-#include <list>
+// #include <list>
 #include <map>
 #include <memory>
 // #include <opencv2/imgproc.hpp>

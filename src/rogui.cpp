@@ -14,7 +14,7 @@ namespace rogui
 {
 
 Player::Player(const std::string& name) :
-  name_(name)
+  Character(name)
 {
   // TODO(lucasw) eventually these need to be context specific, what menu is being used
   key_actions_.insert(std::make_pair(SDLK_h, std::bind(&Player::move, this, -1, 0)));
@@ -35,6 +35,7 @@ void Player::handleKey(const SDL_Keycode& key)
   }
 }
 
+#if 0
 bool Player::move(const int dx, const int dy)
 {
   const int tmp_x = x_ + dx;
@@ -63,6 +64,7 @@ void Player::draw(const ImVec2 window_offset, const float scale)
   // TODO(lucasw) text color
   ImGui::Text("%c", sym_);
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 Rogui::Rogui(const ImVec2 size) : size_(size)
@@ -72,7 +74,7 @@ Rogui::Rogui(const ImVec2 size) : size_(size)
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_HorizontalScrollbar;
 
-  map_ = std::make_shared<Map>(8 * 9, 8 * 5);
+  map_ = std::make_shared<Map>(8 * 8, 8 * 5);
   generateInit(map_);
   // generateRandom(map_);
   generateDucci(map_);

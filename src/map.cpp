@@ -1,4 +1,5 @@
 #include <iostream>
+#include <rogui/character.hpp>
 #include <rogui/map.hpp>
 #include <rogui/rogui.hpp>
 #include <rogui/utility.hpp>
@@ -86,13 +87,16 @@ void generateDucci(std::shared_ptr<Map> map)
     throw std::runtime_error("null map passed to generator");
   }
 
+#if 0
   const size_t& wd = map->width_;
   const size_t& ht = map->height_;
+#endif
 
-  std::vector<std::array<uint16_t, 4> > ducci;
+  std::vector<std::array<int32_t, 3> > ducci;
   const size_t num = 48;
   ducci.reserve(num);
-  ducci.push_back({0, 653, 1854, 4063});
+  // ducci.push_back({0, 653, 1854, 4063});
+  ducci.push_back({2, 4126087, 4126085});
 
   for (size_t i = 1; i < num; ++i) {
     const auto& ducci1 = ducci[i - 1];
