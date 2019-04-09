@@ -14,6 +14,13 @@
 namespace rogui
 {
 
+enum CELL_TYPES
+{
+  IMPASSABLE = 0,
+  STONE,
+  FLOOR
+};
+
 struct Cell
 {
   Cell(const std::string& name) : name_(name)
@@ -35,6 +42,11 @@ struct Cell
   const std::string name_;
   ImU32 col32_;
 };
+
+class Map;
+
+void generateInit(std::shared_ptr<Map> map);
+void generateRandom(std::shared_ptr<Map> map);
 
 class Player;
 

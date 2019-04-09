@@ -72,7 +72,10 @@ Rogui::Rogui(const ImVec2 size) : size_(size)
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_HorizontalScrollbar;
 
-  map_ = std::make_shared<Map>(60, 30);
+  map_ = std::make_shared<Map>(90, 40);
+  generateInit(map_);
+  generateRandom(map_);
+
   player_ = std::make_shared<Player>("player");
   player_->sym_ = '@';
   player_->map_ = map_;

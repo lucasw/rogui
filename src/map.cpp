@@ -13,47 +13,72 @@
 namespace rogui
 {
 
-Map::Map(const size_t width, const size_t height) :
-  width_(width),
-  height_(height)
+void generateInit(std::shared_ptr<Map> map)
 {
-  std::cout << "new Map " << width_ << " " << height_ << " " << width_ * height_ << "\n";
-
-  grid_.resize(width_ * height_);
-
   // TODO(lucasw) load all the cell types from a text file
   Cell impassable("impassable");
   impassable.col32_ = ImColor(ImVec4(0.2, 0.2, 0.2, 1.0));
-  cells_.insert(std::make_pair(0, impassable));
+  map->cells_.insert(std::make_pair(IMPASSABLE, impassable));
 
   Cell stone("stone");
   stone.col32_ = ImColor(ImVec4(0.4, 0.4, 0.4, 1.0));
-  cells_.insert(std::make_pair(1, stone));
+  map->cells_.insert(std::make_pair(STONE, stone));
 
   // TODO(lucasw) later have a 3D block conception of the map,
   // for now have different floor vs. wall materials
   Cell floor("floor");
   floor.col32_ = ImColor(ImVec4(0.6, 0.5, 0.3, 1.0));
-  cells_.insert(std::make_pair(2, floor));
+  map->cells_.insert(std::make_pair(FLOOR, floor));
 
-  for (size_t y = 1; y < height_ - 1; ++y) {
-    for (size_t x = 1; x < width_ - 1; ++x) {
-      const size_t ind = y * width_ + x;
-      grid_[ind] = 1;
+  const size_t& wd = map->width_;
+  const size_t& ht = map->height_;
+
+  for (size_t y = 1; y < ht - 1; ++y) {
+    for (size_t x = 1; x < wd - 1; ++x) {
+      const size_t ind = y * wd + x;
+      map->grid_[ind] = IMPASSABLE;
     }
   }
 
   // make one large room with random stones in it
   // later TODO(lucasw) load from file or generate randomly elsewhere
-  for (size_t y = 5; y < height_ - 5; ++y) {
-    for (size_t x = 5; x < width_ - 5; ++x) {
-      const size_t ind = y * width_ + x;
+  for (size_t y = 1; y < ht - 1; ++y) {
+    for (size_t x = 1; x < wd - 1; ++x) {
+      const size_t ind = y * wd + x;
+      map->grid_[ind] = STONE;
+    }
+  }
+}
+
+void generateRandom(std::shared_ptr<Map> map)
+{
+  if (map == nullptr) {
+    throw std::runtime_error("null map passed to generator");
+  }
+
+  const size_t& wd = map->width_;
+  const size_t& ht = map->height_;
+
+  // make one large room with random stones in it
+  // later TODO(lucasw) load from file or generate randomly elsewhere
+  const size_t border = 2;
+  for (size_t y = border; y < ht - border; ++y) {
+    for (size_t x = border; x < wd - border; ++x) {
+      const size_t ind = y * wd + x;
       if (rand() % 10 == 0) {
         continue;
       }
-      grid_[ind] = 2;
+      map->grid_[ind] = FLOOR;
     }
   }
+}
+
+Map::Map(const size_t width, const size_t height) :
+  width_(width),
+  height_(height)
+{
+  std::cout << "new Map " << width_ << " " << height_ << " " << width_ * height_ << "\n";
+  grid_.resize(width_ * height_);
 }
 
 bool Map::passable(const int& x, const int& y)
