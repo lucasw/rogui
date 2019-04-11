@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <imgui.h>
-// #include <list>
+#include <list>
 #include <map>
 #include <memory>
 // #include <opencv2/imgproc.hpp>
@@ -11,6 +11,8 @@
 
 namespace rogui
 {
+
+class Character;
 
 enum CELL_TYPES
 {
@@ -43,9 +45,13 @@ struct Cell
 
 class Map;
 
+// TODO(lucasw) don't want shared_ptr constructor/copy overhead in functions
+// getting called often.
 void generateInit(std::shared_ptr<Map> map);
 void generateRandom(std::shared_ptr<Map> map);
 void generateDucci(std::shared_ptr<Map> map);
+
+void populateMap(std::shared_ptr<Map> map);
 
 class Player;
 
@@ -65,8 +71,8 @@ public:
   std::vector<uint8_t> grid_;
   std::map<uint8_t, Cell> cells_;
 
-  // TODO(lucasw) list of entities
   std::shared_ptr<Player> player_;
+  std::list<std::shared_ptr<Character> > characters_;
 
   const size_t width_;
   const size_t height_;

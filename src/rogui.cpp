@@ -78,13 +78,17 @@ Rogui::Rogui(const ImVec2 size) : size_(size)
   generateInit(map_);
   // generateRandom(map_);
   generateDucci(map_);
+  populateMap(map_);
 
   player_ = std::make_shared<Player>("player");
   player_->sym_ = '@';
   player_->map_ = map_;
   player_->x_ = map_->width_ / 2;
   player_->y_ = map_->height_ / 2;
+  // TODO(lucasw) probably should decouple maps and views into maps,
+  // only the latter would
   map_->player_ = player_;
+  map_->characters_.push_back(player_);
 
   msg_.reserve(80 * 20);
 }
@@ -107,6 +111,7 @@ bool Rogui::droppedFile(const std::string name)
 
 void Rogui::update(const std::vector<SDL_Keycode>& key_presses)
 {
+  // map_->update();
   for (const auto& key : key_presses) {
     player_->handleKey(key);
   }

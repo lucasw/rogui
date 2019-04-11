@@ -129,6 +129,20 @@ void generateDucci(std::shared_ptr<Map> map)
   }
 }
 
+void populateMap(std::shared_ptr<Map> map)
+{
+  const size_t num_characters = 8;
+  for (size_t i = 0; i < num_characters; ++i) {
+    auto character = std::make_shared<Character>("enemy" + std::to_string(i));
+    // TODO(lucasw) use better rng
+    character->sym_ = std::to_string(i)[0];
+    character->x_ = rand() % map->width_;
+    character->y_ = rand() % map->height_;
+    map->characters_.push_back(character);
+  }
+}
+
+/////////////////////////////////////////////////////////////
 Map::Map(const size_t width, const size_t height) :
   width_(width),
   height_(height)
@@ -197,7 +211,8 @@ void Map::draw(const int x, const int y, const size_t width, const size_t height
     }
   }
 
-  player_->draw(pt, scale);
+  std::for_each(std::begin(characters_), std::end(characters_),
+      [pt, scale](auto& character){character->draw(pt, scale);});
 }
 
 }  // namespace rogui
